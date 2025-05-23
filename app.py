@@ -67,10 +67,10 @@ def editoriales_negocio():
     db.session.commit()
     return jsonify({'mensaje': 'editorial cargada correctamente'}), 201
 
-@app.route('/editoriales/pais/<String>', methods=['GET'])
+@app.route('/editoriales/pais/usa', methods=['GET'])
 def editoriales_pais():
-    editoriales = editoriales.query.filter_by(country=country).all()
-    return jsonify([{'id': e.pub_id, 'nombre': e.pub_name, 'ciudad': e.city, 'estado': e.state, 'pais': e.country} for e in editoriales]), 200
+    editorial = editoriales.query.filter_by(country='usa').all()
+    return jsonify([{'id': e.pub_id, 'nombre': e.pub_name, 'ciudad': e.city, 'estado': e.state, 'pais': e.country} for e in editorial]), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
