@@ -61,7 +61,7 @@ def ventas_por_id(stor_id):
     ]), 200
 
 @app.route('/ventas/años/<string:fecha>', methods=['GET'])
-def ventas_por_anio(fecha):
+def ventas_por_fecha(fecha):
     ventas_filtradas = ventas.query.filter(ventas.ord_date.ilike(f"{fecha}%")).all()
     return jsonify([
         {
