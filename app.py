@@ -43,15 +43,55 @@ class ventas(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route('/ventas/año/', methods=['GET'])
-def ventas_años():
-    venta = ventas.query.filter_by(stor_id='7066').all()
-    return jsonify([{'id': v.stor_id, 'numero de orden': v.ord_num, 'fecha de la orden': v.ord_date, 'cantidad': v.qty, 'payterms': v.payterms,'id del titulo': v.title_id} for v in venta]), 200
+# La modificación que hice en el codigo fue en la forma de introducir el parametro en la URL y a su vez incluirlo en la función y variable. Cree la consulta por fecha para poder verificar la consulta a fechas modeladas como strings.
+#No es obligatorio colocar <tipo_dato: parametro> en la URL, pero es una buena práctica para que Flask sepa qué tipo de dato esperar. En caso de no colocarlo, Flask asumirá que el parámetro es una cadena de texto (string) por defecto.
 
-@app.route('/titulos/tipo/', methods=['GET'])
-def titulos_negocio():
-    titulo = titulos.query.filter_by(type='business').all()
-    return jsonify([{'id': t.title_id, 'titulo': t.title, 'tipo': t.type, 'id de la editorial': t.pub_id, 'precio': t.price, 'anticipo': t.anticipo, 'renta': t.renta, 'vendidos': t.vendidos, 'observaciones': t.observaciones, 'fecha de alta': t.fecha_alta} for t in titulo]), 200
+@app.route('/ventas/<int:stor_id>', methods=['GET'])
+def ventas_por_id(stor_id):
+    venta = ventas.query.filter_by(stor_id=stor_id).all()
+    return jsonify([
+        {
+            'id': v.stor_id,
+            'numero de orden': v.ord_num,
+            'fecha de la orden': v.ord_date,
+            'cantidad': v.qty,
+            'payterms': v.payterms,
+            'id del titulo': v.title_id
+        } for v in venta
+    ]), 200
+
+@app.route('/ventas/años/<string:fecha>', methods=['GET'])
+def ventas_por_anio(fecha):
+    ventas_filtradas = ventas.query.filter(ventas.ord_date.ilike(f"{fecha}%")).all()
+    return jsonify([
+        {
+            'id': v.stor_id,
+            'numero de orden': v.ord_num,
+            'fecha de la orden': v.ord_date,
+            'cantidad': v.qty,
+            'payterms': v.payterms,
+            'id del titulo': v.title_id
+        } for v in ventas_filtradas
+    ]), 200
+
+@app.route('/titulos/tipo/<string:tipo>', methods=['GET'])
+def titulos_por_tipo(tipo):
+    titulo = titulos.query.filter_by(type=tipo).all()
+    return jsonify([
+        {
+            'id': t.title_id,
+            'titulo': t.title,
+            'tipo': t.type,
+            'id de la editorial': t.pub_id,
+            'precio': t.price,
+            'anticipo': t.anticipo,
+            'renta': t.renta,
+            'vendidos': t.vendidos,
+            'observaciones': t.observaciones,
+            'fecha de alta': t.fecha_alta
+        } for t in titulo
+    ]), 200
+
 
 @app.route('/editoriales', methods=['POST'])
 def editoriales_negocio():
@@ -67,10 +107,18 @@ def editoriales_negocio():
     db.session.commit()
     return jsonify({'mensaje': 'editorial cargada correctamente'}), 201
 
-@app.route('/editoriales/pais/usa', methods=['GET'])
-def editoriales_pais():
-    editorial = editoriales.query.filter_by(country='usa').all()
-    return jsonify([{'id': e.pub_id, 'nombre': e.pub_name, 'ciudad': e.city, 'estado': e.state, 'pais': e.country} for e in editorial]), 200
+@app.route('/editoriales/pais/<string:pais>', methods=['GET'])
+def editoriales_por_pais(pais):
+    editorial = editoriales.query.filter_by(country=pais).all()
+    return jsonify([
+        {
+            'id': e.pub_id,
+            'nombre': e.pub_name,
+            'ciudad': e.city,
+            'estado': e.state,
+            'pais': e.country
+        } for e in editorial
+    ]), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
